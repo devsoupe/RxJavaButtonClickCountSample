@@ -16,7 +16,10 @@ class MainActivity : AppCompatActivity() {
   }
 
   private val disposables = CompositeDisposable()
+
   private lateinit var helloButtonClickStream: Observable<Unit>
+  private lateinit var helloButtonClickMapTo1Stream: Observable<Int>
+  private lateinit var helloButtonClickCountStream: Observable<Int>
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -26,9 +29,25 @@ class MainActivity : AppCompatActivity() {
   override fun onStart() {
     super.onStart()
 
+//    setupClickCountStream1()
+    setupClickCountStream2()
+  }
+
+  private fun setupClickCountStream1() {
     helloButtonClickStream = findViewById<Button>(R.id.bt_hello).clicks()
-    helloButtonClickStream
-      .subscribe { Log.d(TAG, "helloButtonClicked") }
+    helloButtonClickMapTo1Stream = helloButtonClickStream.map { 1 }
+    helloButtonClickCountStream = helloButtonClickMapTo1Stream.scan { t1, t2 -> t1 + t2 }
+
+    helloButtonClickCountStream
+      .subscribe { Log.d(TAG, "helloButtonClicked : $it") }
+      .addTo(disposables)
+  }
+
+  private fun setupClickCountStream2() {
+    findViewById<Button>(R.id.bt_hello).clicks()
+      .map { 1 }
+      .scan { t1, t2 -> t1 + t2 }
+      .subscribe { Log.d(TAG, "helloButtonClicked : $it") }
       .addTo(disposables)
   }
 
